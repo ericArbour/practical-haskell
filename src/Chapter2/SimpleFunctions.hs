@@ -7,10 +7,10 @@ import Data.Maybe
 firstOrEmpty :: [String] -> String
 firstOrEmpty lst = if not (null lst) then head lst else "empty"
 
-countGenders :: [Client] -> GenderCount
+countGenders :: [Client a] -> GenderCount
 countGenders = foldr countGender GenderCount { male = 0, female = 0, unknown = 0 } . map fromJust . filter isJust . map getGender 
 
-getGender :: Client -> Maybe Gender
+getGender :: Client a -> Maybe Gender
 getGender (Company { person = Person { gender } }) = Just gender
 getGender (Individual { person = Person { gender } }) = Just gender
 getGender _ = Nothing
@@ -20,15 +20,15 @@ countGender Male GenderCount { male, female, unknown } = GenderCount { male = ma
 countGender Female GenderCount { male, female, unknown } = GenderCount { male = male, female = female + 1, unknown }
 countGender Unknown GenderCount { male, female, unknown } = GenderCount { male = male, female, unknown = unknown + 1 }
 
-clients :: [Client]
-clients = [ GovOrg { clientName = "The Library" }
+clients :: [Client Int]  
+clients = [ GovOrg { clientId = 1, clientName = "The Library" }
           , Company { clientName = "McDonalds"
-                    , companyId = 1
+                    , clientId = 2
                     , person = Person { firstName = "Ronald"
                                       , lastName = "McDonald"
                                       , gender = Unknown }
                     , duty = "Owner"}
-          , Individual { person = Person { firstName = "Elaine"
+          , Individual { clientId = 3, person = Person { firstName = "Elaine"
                                       , lastName = "Benes"
                                       , gender = Female } }
           ]
