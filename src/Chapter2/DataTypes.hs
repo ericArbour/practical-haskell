@@ -54,11 +54,6 @@ data GenderCount =
     }
   deriving (Show)
 
-data ClientKind
-  = GovOrgKind
-  | CompanyKind
-  | IndividualKind
-
 instance Eq Gender where
   Male == Male = True
   Female == Female = True
@@ -66,4 +61,19 @@ instance Eq Gender where
   _ == _ = False
 
 instance Ord Gender where
+  _ `compare` _ = EQ
+
+data ClientKind
+  = GovOrgKind
+  | CompanyKind
+  | IndividualKind
+  deriving (Show)
+
+instance Eq ClientKind where
+  GovOrgKind == GovOrgKind = True
+  CompanyKind == CompanyKind = True
+  IndividualKind == IndividualKind = True
+  _ == _ = False
+
+instance Ord ClientKind where
   _ `compare` _ = EQ
