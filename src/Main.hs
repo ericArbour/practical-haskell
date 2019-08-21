@@ -7,4 +7,4 @@ import Chapter2.SimpleFunctions
 
 main :: IO ()
 main = do
-  print (classifyClients' clients)
+  print (totalPrice timeMachines)

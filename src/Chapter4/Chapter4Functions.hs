@@ -1,6 +1,7 @@
 module Chapter4.Chapter4Functions
   ( classifyClients
   , classifyClients'
+  , totalPrice
   ) where
 
 import Chapter2.DataTypes
@@ -35,3 +36,7 @@ classifyClients' clients =
     putInList client@(GovOrg {}) [gs, cs, is] = [client : gs, cs, is]
     putInList client@(Company {}) [gs, cs, is] = [gs, client : cs, is]
     putInList client@(Individual {}) [gs, cs, is] = [gs, cs, client : is]
+
+-- 4.4
+totalPrice :: Priceable p => [p] -> Float
+totalPrice = sum . map price

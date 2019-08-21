@@ -71,9 +71,9 @@ discountTimeMachine discount TimeMachine { manufacturer
                                          , model
                                          , name
                                          , direction
-                                         , price
+                                         , timeMachinePrice
                                          } =
-  TimeMachine {manufacturer, model, name, direction, price = price * discount}
+  TimeMachine {manufacturer, model, name, direction, timeMachinePrice = timeMachinePrice * discount}
 
 timeMachines :: [TimeMachine]
 timeMachines =
@@ -82,21 +82,21 @@ timeMachines =
       , model = 8
       , name = "Commando 8"
       , direction = Past
-      , price = 400.00
+      , timeMachinePrice = 400.00
       }
   , TimeMachine
       { manufacturer = "Kramerica Industries"
       , model = 450
       , name = "Commando 450"
       , direction = Future
-      , price = 700.00
+      , timeMachinePrice = 700.00
       }
   , TimeMachine
       { manufacturer = "Pendant Publishing"
       , model = 2
       , name = "Commando 3000"
       , direction = Future
-      , price = 499.99
+      , timeMachinePrice = 499.99
       }
   ]
 
