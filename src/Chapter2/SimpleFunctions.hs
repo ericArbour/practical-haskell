@@ -69,32 +69,32 @@ discountTimeMachines discount tms = map (discountTimeMachine discount) tms
 discountTimeMachine :: Float -> TimeMachine -> TimeMachine
 discountTimeMachine discount TimeMachine { manufacturer
                                          , model
-                                         , name
+                                         , timeMachineName
                                          , direction
                                          , timeMachinePrice
                                          } =
-  TimeMachine {manufacturer, model, name, direction, timeMachinePrice = timeMachinePrice * discount}
+  TimeMachine {manufacturer, model, timeMachineName, direction, timeMachinePrice = timeMachinePrice * discount}
 
 timeMachines :: [TimeMachine]
 timeMachines =
   [ TimeMachine
       { manufacturer = "Vandelay Industries"
       , model = 8
-      , name = "Commando 8"
+      , timeMachineName = "Commando 8"
       , direction = Past
       , timeMachinePrice = 400.00
       }
   , TimeMachine
       { manufacturer = "Kramerica Industries"
       , model = 450
-      , name = "Commando 450"
+      , timeMachineName = "Commando 450"
       , direction = Future
       , timeMachinePrice = 700.00
       }
   , TimeMachine
       { manufacturer = "Pendant Publishing"
       , model = 2
-      , name = "Commando 3000"
+      , timeMachineName = "Commando 3000"
       , direction = Future
       , timeMachinePrice = 499.99
       }

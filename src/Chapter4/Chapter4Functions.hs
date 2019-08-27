@@ -40,3 +40,8 @@ classifyClients' clients =
 -- 4.4
 totalPrice :: Priceable p => [p] -> Float
 totalPrice = sum . map price
+
+data BinaryTree a
+  = Node a (BinaryTree a) (BinaryTree a)
+  | Leaf
+  deriving (Show)
