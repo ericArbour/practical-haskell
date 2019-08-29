@@ -45,3 +45,14 @@ data BinaryTree a
   = Node a (BinaryTree a) (BinaryTree a)
   | Leaf
   deriving (Show)
+
+treeInsert :: Ord a => a -> BinaryTree a -> BinaryTree a
+treeInsert x n@(Node v l r) = case compare x v of
+  EQ -> n
+  LT -> Node v (treeInsert x l) r
+  GT -> Node v l (treeInsert x r)
+treeInsert x Leaf = Node x Leaf Leaf 
+
+concatTrees :: Ord a => BinaryTree a -> BinaryTree a -> BinaryTree a
+concatTrees (Node v l r) t2 = concatTrees r $ concatTrees l $ treeInsert v t2
+concatTrees Leaf t2 = t2
