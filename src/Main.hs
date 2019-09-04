@@ -7,4 +7,4 @@ import Chapter2.SimpleFunctions
 
 main :: IO ()
 main = do
-  print (totalPrice timeMachines)
+  print (take 100 primes)

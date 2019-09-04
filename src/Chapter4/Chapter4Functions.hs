@@ -1,7 +1,5 @@
 module Chapter4.Chapter4Functions
-  ( classifyClients
-  , classifyClients'
-  , totalPrice
+  ( primes
   ) where
 
 import Chapter2.DataTypes
@@ -47,12 +45,37 @@ data BinaryTree a
   deriving (Show)
 
 treeInsert :: Ord a => a -> BinaryTree a -> BinaryTree a
-treeInsert x n@(Node v l r) = case compare x v of
-  EQ -> n
-  LT -> Node v (treeInsert x l) r
-  GT -> Node v l (treeInsert x r)
-treeInsert x Leaf = Node x Leaf Leaf 
+treeInsert x n@(Node v l r) =
+  case compare x v of
+    EQ -> n
+    LT -> Node v (treeInsert x l) r
+    GT -> Node v l (treeInsert x r)
+treeInsert x Leaf = Node x Leaf Leaf
 
 concatTrees :: Ord a => BinaryTree a -> BinaryTree a -> BinaryTree a
 concatTrees (Node v l r) t2 = concatTrees r $ concatTrees l $ treeInsert v t2
 concatTrees Leaf t2 = t2
+
+newtype CouldBe a =
+  CouldBe (Maybe a)
+
+instance Functor CouldBe where
+  fmap f (CouldBe (Just a)) = CouldBe (Just (f a))
+  fmap f (CouldBe Nothing) = CouldBe Nothing
+
+instance Foldable CouldBe where
+  foldr f b (CouldBe Nothing) = b
+  foldr f b (CouldBe (Just a)) = f a b
+
+instance Functor BinaryTree where
+  fmap f Leaf = Leaf
+  fmap f (Node v l r) = Node (f v) (fmap f l) (fmap f r)
+
+instance Foldable BinaryTree where
+  foldr f b Leaf = b
+  foldr f b (Node v l r) = f v (foldr f (foldr f b r) l)
+
+primes :: [Integer]
+primes = map head sieve
+  where
+    sieve = [2 ..] : map (\xs -> filter (\y -> y `mod` head xs /= 0) xs) sieve
