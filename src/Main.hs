@@ -2,9 +2,8 @@ module Main
   ( main
   ) where
 
-import Chapter4.Chapter4Functions
-import Chapter2.SimpleFunctions
+import qualified Chapter6.KMeans as KMs
+import qualified Chapter6.Chapter6Functions as Ch6
 
 main :: IO ()
-main = do
-  print (take 100 primes)
+main = Ch6.main

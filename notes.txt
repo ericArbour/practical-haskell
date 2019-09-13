@@ -1,3 +1,8 @@
 Pg. 149, second reference to "All" at bottom of the page should be "Any".
 
-Pg. 179, first paragraph, "memory and time used by your problem". Should "problem" be replaced with "program"? 
+Pg. 179, first paragraph, "memory and time used by your problem". Should "problem" be replaced with "program"?
+
+Pg. 211, Functor instance for State s should be:
+instance Functor (State s) where
+  fmap f gWithState = \s -> let (gResult, gState) =  g s
+  in (f gResult, gState) 
