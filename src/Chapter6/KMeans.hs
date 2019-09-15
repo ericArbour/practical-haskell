@@ -1,16 +1,14 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Chapter6.KMeans
-  ( test
+  ( main
   ) where
 
 import Data.List
 import qualified Data.Map as M
-
-test = do
-  let info = [(1,1),(1,2),(4,4),(4,5)]::[(Double,Double)]
-  print $ kMeans initializeSimple 2 info 0.001
+import Lens.Micro.Platform
 
 class Ord v =>
       Vector v
@@ -33,26 +31,44 @@ class Vector v =>
 instance Vectorizable (Double, Double) (Double, Double) where
   toVector = id
 
+data KMeansState e v =
+  KMeansState
+    { _centroids :: [v]
+    , _points :: [e]
+    , _err :: Double
+    , _threshold :: Double
+    , _steps :: Int
+    }
+
+makeLenses ''KMeansState
+
 clusterAssignmentPhase ::
-     (Ord v, Vector v, Vectorizable e v) => [v] -> [e] -> M.Map v [e]
-clusterAssignmentPhase centroids points =
-  let initialMap = M.fromList $ zip centroids (repeat [])
+     (Ord v, Vector v, Vectorizable e v) => KMeansState e v -> M.Map v [e]
+clusterAssignmentPhase state =
+  let initialMap = M.fromList $ zip (state ^. centroids) (repeat [])
    in foldr
         (\p m ->
-           let chosenC = minimumBy (compareDistance p) centroids
+           let chosenC = minimumBy (compareDistance p) (state ^. centroids)
             in M.adjust (p :) chosenC m)
         initialMap
-        points
+        (state ^. points)
   where
     compareDistance p x y =
       compare (distance x $ toVector p) (distance y $ toVector p)
 
-newCentroidPhase :: (Vector v, Vectorizable e v) => M.Map v [e] -> [(v, v)]
-newCentroidPhase = M.toList . fmap (centroid . map toVector)
+newCentroidPhase ::
+     (Vector v, Vectorizable e v)
+  => KMeansState e v
+  -> M.Map v [e]
+  -> KMeansState e v
+newCentroidPhase state assignments =
+  state & centroids . traversed %~
+  (\c -> centroid $ fmap toVector $ M.findWithDefault [] c assignments)
 
-shouldStop :: (Vector v) => [(v, v)] -> Double -> Bool
-shouldStop centroids threshold =
-  foldr (\(x, y) s -> s + distance x y) 0.0 centroids < threshold
+initializeState ::
+     (Int -> [e] -> [v]) -> Int -> [e] -> Double -> KMeansState e v
+initializeState initFn k points t =
+  KMeansState (initFn k points) points (1.0 / 0.0) t 0
 
 kMeans ::
      (Vector v, Vectorizable e v)
@@ -60,18 +76,27 @@ kMeans ::
   -> Int -- number of centroids 
   -> [e] -- the information
   -> Double -- threshold
-  -> ([v], Int) -- centroids after convergence
-kMeans initFn k points = kMeans' (initFn k points) points 1
+  -> [v] -- centroids after convergence
+kMeans initFn k points t =
+  view centroids $ kMeans' (initializeState initFn k points t)
 
-kMeans' :: (Vector v, Vectorizable e v) => [v] -> [e] -> Int -> Double -> ([v], Int)
-kMeans' centroids points count threshold = 
-  let assignments = clusterAssignmentPhase centroids points
-      oldNewCentroids = newCentroidPhase assignments
-      newCentroids = map snd oldNewCentroids
-  in if shouldStop oldNewCentroids threshold
-     then (newCentroids, count)
-     else kMeans' newCentroids points (count + 1) threshold 
+kMeans' :: (Vector v, Vectorizable e v) => KMeansState e v -> KMeansState e v
+kMeans' state =
+  let assignments = clusterAssignmentPhase state
+      state1 = newCentroidPhase state assignments
+      state2 =
+        state1 & err .~
+        sum (zipWith distance (state ^. centroids) (state1 ^. centroids))
+      state3 = state2 & steps +~ 1
+   in if state3 ^. err < state3 ^. threshold
+        then state3
+        else kMeans' state3
 
-initializeSimple :: Int -> [e] -> [(Double,Double)]
+initializeSimple :: Int -> [e] -> [(Double, Double)]
 initializeSimple 0 _ = []
-initializeSimple n v = (fromIntegral n, fromIntegral n) : initializeSimple (n - 1) v
+initializeSimple n v =
+  (fromIntegral n, fromIntegral n) : initializeSimple (n - 1) v
+
+main = do
+  let info = [(1, 1), (1, 2), (4, 4), (4, 5)] :: [(Double, Double)]
+  print $ kMeans initializeSimple 2 info 0.001

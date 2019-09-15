@@ -49,5 +49,56 @@ timeMachines =
 increasePrices :: Float -> [TimeMachine] -> [TimeMachine]
 increasePrices percentage = map (\tm -> tm & price %~ (*) (1 + percentage))
 
+thenDo :: Maybe a -> (a -> Maybe b) -> Maybe b
+thenDo Nothing _ = Nothing
+thenDo (Just x) f = f x
+
+numberItemsByPurchaseId :: Integer -> Maybe Integer
+numberItemsByPurchaseId id = Nothing
+
+productIdByPurchaseId :: Integer -> Maybe Integer
+productIdByPurchaseId id = Nothing
+
+priceByProductId :: Integer -> Maybe Double
+priceByProductId id = Nothing
+
+purchaseValue :: Integer -> Maybe Double
+purchaseValue purchaseId = do
+  n <- numberItemsByPurchaseId purchaseId
+  productId <- productIdByPurchaseId purchaseId
+  price <- priceByProductId productId
+  return $ fromInteger n * price
+
+newtype MyWriter m a =
+  MyWriter (a, m) deriving (Show)
+
+instance Monoid m => Functor (MyWriter m) where
+  fmap f (MyWriter (a, m)) = MyWriter (f a, m)
+
+instance Monoid m => Applicative (MyWriter m) where
+  pure a = MyWriter (a, mempty)
+  MyWriter (f, m1) <*> MyWriter (a, m2) = MyWriter (f a, mappend m1 m2)
+
+instance Monoid m => Monad (MyWriter m) where
+  MyWriter (a1, m1) >>= f =
+    let MyWriter (a2, m2) = f a1
+     in MyWriter (a2, mappend m1 m2)
+  return = pure
+
+tell :: Monoid m => m -> MyWriter m () 
+tell m = MyWriter ((),m)
+
+readInformation :: MyWriter String String
+readInformation  = MyWriter ("blah", "Info read. ")
+
+computeValue :: String -> MyWriter String String
+computeValue s = MyWriter (s, s ++ " value computed. ")
+
+accessDatabase :: MyWriter String ()
+accessDatabase = do tell "Start database access. "
+                    info <- readInformation
+                    computeValue info
+                    tell "Finish database access. "
+
 main = do
- print $ increasePrices 0.1 timeMachines
+  print $ accessDatabase
