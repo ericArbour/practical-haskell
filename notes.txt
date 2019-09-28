@@ -5,4 +5,6 @@ Pg. 179, first paragraph, "memory and time used by your problem". Should "proble
 Pg. 211, Functor instance for State s should be:
 instance Functor (State s) where
   fmap f gWithState = \s -> let (gResult, gState) =  g s
-  in (f gResult, gState) 
+  in (f gResult, gState)
+
+Pg. 236, "mplus one works over" seems incorrect. 
