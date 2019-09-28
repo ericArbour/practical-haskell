@@ -3,8 +3,8 @@ module Chapter7.Chapter7Functions
   ) where
 
 import Control.Monad
-import Control.Monad.Reader
 import Control.Monad.Logic
+import Control.Monad.Reader
 import qualified Data.Set as S
 
 brokenJumps :: Int -> Int -> [Int]
@@ -119,10 +119,10 @@ purchaseToTransaction (Purchase c p) =
 
 pathsL :: [(Int, Int)] -> Int -> Int -> Logic [Int]
 pathsL edges start end =
-  let e_paths = choices edges >>= \(e_start, e_end) ->
-        guard (e_start == start) >> 
-        pathsL edges e_end end >>= \subpath ->
-        return $ start : subpath
+  let e_paths =
+        choices edges >>= \(e_start, e_end) ->
+          guard (e_start == start) >> pathsL edges e_end end >>= \subpath ->
+            return $ start : subpath
    in if start == end
         then return [end] `mplus` e_paths
         else e_paths
@@ -131,19 +131,20 @@ choices :: [a] -> Logic a
 choices = msum . map return
 
 graph1 :: [(Int, Int)]
-graph1 = [(2013,501),(2013,1004),(501,2558),(1004,2558)]
+graph1 = [(2013, 501), (2013, 1004), (501, 2558), (1004, 2558)]
 
 sequence' :: Monad m => [m a] -> m [a]
 sequence' [] = return []
-sequence' (ma:mas) = 
+sequence' (ma:mas) =
   let mAs = do
-              a <- ma
-              return [a]
-  in foo mAs (sequence' mas)
-  where foo mAs mBs = do
-                      as <- mAs
-                      bs <- mBs
-                      return (as ++ bs)
+        a <- ma
+        return [a]
+   in foo mAs (sequence' mas)
+  where
+    foo mAs mBs = do
+      as <- mAs
+      bs <- mBs
+      return (as ++ bs)
 
 mapM' :: Monad m => (a -> m b) -> [a] -> m [b]
 mapM' f = sequence' . map f
@@ -156,4 +157,4 @@ addPrefixL = mapM' addPrefix
 
 main :: IO ()
 main = do
-  print $ runReader (addPrefixL ["one","two"]) "**-"
+  print $ runReader (addPrefixL ["one", "two"]) "**-"
