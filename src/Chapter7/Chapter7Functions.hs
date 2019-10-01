@@ -4,7 +4,10 @@ module Chapter7.Chapter7Functions
 
 import Control.Monad
 import Control.Monad.Logic
+import Control.Monad.RWS hiding (Product)
 import Control.Monad.Reader
+import Control.Monad.State
+import Control.Monad.Writer hiding (Product)
 import qualified Data.Set as S
 
 brokenJumps :: Int -> Int -> [Int]
@@ -155,6 +158,59 @@ addPrefix s = ask >>= \p -> return $ p ++ s
 addPrefixL :: [String] -> Reader String [String]
 addPrefixL = mapM' addPrefix
 
+factorial :: Integer -> Integer
+factorial n = execState (execStateT fact' n) n
+
+fact' :: StateT Integer (State Integer) ()
+fact' = do
+  counter <- get
+  value <- lift get
+  if value == 0
+    then do
+      lift $ put 1
+      return ()
+    else if counter < 2
+           then return ()
+           else do
+             put (counter - 1)
+             lift $ put (value * (counter - 1))
+             fact'
+
+pathsWriter :: [(Int, Int)] -> Int -> Int -> WriterT [Int] [] ()
+pathsWriter edges start end =
+  let e_paths = do
+        (e_start, e_end) <- lift edges
+        guard $ e_start == start
+        tell [start]
+        pathsWriter edges e_end end
+   in if start == end
+        then tell [start] `mplus` e_paths
+        else e_paths
+
+pathsReaderWriter :: Int -> Int -> ReaderT [(Int, Int)] (WriterT [Int] []) ()
+pathsReaderWriter start end =
+  let e_paths = do
+        edges <- ask
+        (e_start, e_end) <- lift $ lift edges
+        guard $ e_start == start
+        tell [start]
+        pathsReaderWriter e_end end
+   in if start == end
+        then tell [start] `mplus` e_paths
+        else e_paths
+
+pathsRWST :: Int -> Int -> RWST [(Int, Int)] [Int] () [] ()
+pathsRWST start end =
+  let e_paths = do
+        edges <- ask
+        (e_start, e_end) <- lift edges
+        guard $ e_start == start
+        tell [start]
+        pathsRWST e_end end
+   in if start == end
+        then tell [start] `mplus` e_paths
+        else e_paths
+
 main :: IO ()
 main = do
-  print $ runReader (addPrefixL ["one", "two"]) "**-"
+  print $ map (\(_, _, x) -> x) $ runRWST (pathsRWST 2013 2558) graph1 ()
