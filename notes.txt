@@ -8,3 +8,7 @@ instance Functor (State s) where
   in (f gResult, gState)
 
 Pg. 236, "mplus one works over" seems incorrect. 
+
+Pg. 274, "you need to write add two dashes before the options", remove "write".
+
+Pg. 275, in figure 8-2, "lookup product" and "lookup client" are opposite of the IVar dependencies in the code below.
