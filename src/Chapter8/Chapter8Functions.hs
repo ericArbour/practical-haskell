@@ -162,8 +162,8 @@ land events activeYears event = do
 travel :: TVar [Event] -> TVar [Int] -> Trip -> IO ()
 travel events activeYears trip = do
   let (Trip pid destination duration) = trip
-  let takeoffOrigin = Event "takeoff" pid currentYear destination 
-  let travelTime = getTravelTime destination
+      takeoffOrigin = Event "takeoff" pid currentYear destination 
+      travelTime = getTravelTime destination
   atomically $ takeoff events activeYears takeoffOrigin
   threadDelay travelTime
   let landDestination = Event "land" pid currentYear destination
