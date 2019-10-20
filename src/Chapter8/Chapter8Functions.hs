@@ -1,12 +1,17 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DuplicateRecordFields #-}
 
 module Chapter8.Chapter8Functions where
 
+import Control.Concurrent
+import Control.Concurrent.STM
+import Control.Concurrent.STM.TVar
 import Control.DeepSeq
 import Control.Monad.Par
 import Data.List
 import qualified Data.Map as M
+import Data.Maybe
 
 findFactors :: Integer -> [Integer]
 findFactors 1 = [1]
@@ -104,6 +109,86 @@ kMeans' centroids points threshold =
         then newCentroids
         else kMeans' newCentroids points threshold
 
+data Event = Event 
+    String -- type
+    Int -- pid
+    Int -- origin
+    Int -- destination
+  deriving (Eq, Show)
+
+data Trip = Trip
+    Int -- pid
+    Int -- destination
+    Int -- duration
+  deriving (Eq, Show)
+
+currentYear :: Int
+currentYear = 2019
+
+getTravelTime :: Int -> Int
+getTravelTime nonCurrentYear = (abs $ currentYear - nonCurrentYear) * 10000
+
+takeoff :: TVar [Event] -> TVar [Int] -> Event -> STM ()
+takeoff events activeYears event = do
+  let (Event _ _ _ destination) = event
+  if destination == currentYear
+    then do
+      es <- readTVar events
+      writeTVar events $ event:es
+    else do
+      aYs <- readTVar activeYears
+      let isYearActive = isJust $ find (== destination) aYs
+      if isYearActive
+        then retry
+        else do
+          es <- readTVar events
+          writeTVar activeYears $ destination:aYs
+          writeTVar events $ event:es
+
+land :: TVar [Event] -> TVar [Int] -> Event -> STM ()
+land events activeYears event = do
+  let (Event _ _ origin destination) = event
+  if destination == currentYear
+    then do
+      es <- readTVar events
+      aYs <- readTVar activeYears
+      let filteredYears = filter (\y -> y /= origin) aYs
+      writeTVar activeYears filteredYears
+      writeTVar events $ event:es
+    else do
+      es <- readTVar events
+      writeTVar events $ event:es
+
+travel :: TVar [Event] -> TVar [Int] -> Trip -> IO ()
+travel events activeYears trip = do
+  let (Trip pid destination duration) = trip
+  let takeoffOrigin = Event "takeoff" pid currentYear destination 
+  let travelTime = getTravelTime destination
+  atomically $ takeoff events activeYears takeoffOrigin
+  threadDelay travelTime
+  let landDestination = Event "land" pid currentYear destination
+  atomically $ land events activeYears landDestination
+  threadDelay duration
+  let takeoffDestination = Event "takeoff" pid destination currentYear
+  atomically $ takeoff events activeYears takeoffDestination
+  threadDelay travelTime
+  let landOrigin = Event "land" pid destination currentYear
+  atomically $ land events activeYears landOrigin
+
+travelers :: IO ()
+travelers = do
+  events <- newTVarIO []
+  activeYears <- newTVarIO []
+  forkIO $ travel events activeYears (Trip 1 2000 10000)
+  forkIO $ travel events activeYears (Trip 2 1988 10000)
+  forkIO $ travel events activeYears (Trip 3 1995 10000)
+  forkIO $ travel events activeYears (Trip 4 2000 10000)
+  threadDelay 10000000
+  es <- readTVarIO events
+  print $ reverse es
+  _ <- getLine
+  return ()
+
 main :: IO ()
 main = do
-  print $ kMeans initializeSimple 2 info 0.001
+  travelers

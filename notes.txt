@@ -12,3 +12,5 @@ Pg. 236, "mplus one works over" seems incorrect.
 Pg. 274, "you need to write add two dashes before the options", remove "write".
 
 Pg. 275, in figure 8-2, "lookup product" and "lookup client" are opposite of the IVar dependencies in the code below.
+
+Pg. 281, "you can use the readMVar function, which is equivalent to readMVar followed by putMVar with that same value." should the second "readMVar" be takeMVar"?
