@@ -1,0 +1,6 @@
+GovOrg {clientId = 1, clientName = "The Library"}
+Company {clientId = 2, clientName = "McDonalds", person = Person {firstName = "Ronald", lastName = "McDonald", gender = Unknown}, duty = "Owner"}
+Individual {clientId = 3, person = Person {firstName = "Elaine", lastName = "Benes", gender = Female}}
+Individual {clientId = 4, person = Person {firstName = "Jerry", lastName = "Seinfeld", gender = Male}}
+Individual {clientId = 5, person = Person {firstName = "George", lastName = "Costanza", gender = Male}}
+Company {clientId = 6, clientName = "Kramerica Industries", person = Person {firstName = "Cosmo", lastName = "Kramer", gender = Male}, duty = "The Miana"}

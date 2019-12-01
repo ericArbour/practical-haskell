@@ -2,9 +2,14 @@
 
 module Chapter9.Chapter9Functions where
 
-import Control.Monad.Loops (iterateUntilM)
+import Control.Monad (forM_)
+import Control.Monad.Loops (iterateUntilM, whileM_)
+import Data.List (isPrefixOf)
+import System.IO
 import System.Random (randomRIO)
 import Text.Read (readMaybe)
+
+import Chapter2.SimpleFunctions (clients)
 
 guessingGame :: (Int, Int) -> Int -> IO ()
 guessingGame (lo, hi) numGuesses = do
@@ -37,5 +42,34 @@ guessingGame (lo, hi) numGuesses = do
     getParsedGuess :: IO (Maybe Int)
     getParsedGuess = fmap readMaybe getLine
 
+writeClients :: IO ()
+writeClients = do
+  writeHandle <- openFile "clients.txt" WriteMode
+  forM_ clients $ hPutStrLn writeHandle . show
+  hClose writeHandle
+
+writeClientFiles :: IO ()
+writeClientFiles = do
+  withFile "src/Chapter9/clients.txt" ReadMode $ \inHandle -> do
+    writeIndHandle <- openFile "src/Chapter9/individuals.txt" WriteMode
+    writeComHandle <- openFile "src/Chapter9/companies.txt" WriteMode
+    writeGovHandle <- openFile "src/Chapter9/govorgs.txt" WriteMode
+    whileM_ (eOFCheck inHandle) $ do
+      client <- hGetLine inHandle
+      case client of
+        _
+          | "Individual" `isPrefixOf` client -> hPutStrLn writeIndHandle client
+          | "Company" `isPrefixOf` client -> hPutStrLn writeComHandle client
+          | "GovOrg" `isPrefixOf` client -> hPutStrLn writeGovHandle client
+          | otherwise ->
+            putStrLn $ "Warning, invalid client not written: " <> client
+    hClose writeIndHandle
+    hClose writeComHandle
+    hClose writeGovHandle
+  where
+    eOFCheck inHandle = do
+      isEOF <- hIsEOF inHandle
+      return $ not isEOF
+
 main :: IO ()
-main = guessingGame (3, 17) 5
+main = writeClientFiles

@@ -1,0 +1,3 @@
+Individual {clientId = 3, person = Person {firstName = "Elaine", lastName = "Benes", gender = Female}}
+Individual {clientId = 4, person = Person {firstName = "Jerry", lastName = "Seinfeld", gender = Male}}
+Individual {clientId = 5, person = Person {firstName = "George", lastName = "Costanza", gender = Male}}

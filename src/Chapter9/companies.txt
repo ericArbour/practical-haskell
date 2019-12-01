@@ -1,0 +1,2 @@
+Company {clientId = 2, clientName = "McDonalds", person = Person {firstName = "Ronald", lastName = "McDonald", gender = Unknown}, duty = "Owner"}
+Company {clientId = 6, clientName = "Kramerica Industries", person = Person {firstName = "Cosmo", lastName = "Kramer", gender = Male}, duty = "The Miana"}

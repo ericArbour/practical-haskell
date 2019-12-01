@@ -1,7 +1,6 @@
 module Main where
 
-import Lib
+import qualified Chapter9.Chapter9Functions as Ch9
 
 main :: IO ()
-main = do
-  print "test" 
+main = Ch9.main
