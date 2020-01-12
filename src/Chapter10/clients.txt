@@ -1,0 +1,6 @@
+client(gov,1,The Library)
+client(com,2,McDonalds,person(Ronald,McDonald),Owner)
+client(ind,3,person(Elaine,Benes))
+client(ind,4,person(Jerry,Seinfeld))
+client(ind,5,person(George,Costanza))
+client(com,6,Kramerica Industries,person(Cosmo,Kramer),The Miana)

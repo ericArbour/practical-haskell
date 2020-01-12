@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Chapter8.Chapter8Functions where
+module Chapter08.Chapter8Functions where
 
 import Control.Concurrent
 import Control.Concurrent.STM

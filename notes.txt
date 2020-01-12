@@ -16,3 +16,13 @@ Pg. 275, in figure 8-2, "lookup product" and "lookup client" are opposite of the
 Pg. 281, "you can use the readMVar function, which is equivalent to readMVar followed by putMVar with that same value." should the second "readMVar" be takeMVar"?
 
 Pg. 312, "do not comply a certain schema" should be "do not comply with a certain schema."
+
+Pg. 317, "Since deciding whether to use Maybe or Either is difficult but also may have ramifications throughout your application, so you may think about abstracting over the way errors are handled." should be "Since deciding whether to use Maybe or Either is difficult but also may have ramifications throughout your application, you may think about abstracting over the way errors are handled."
+
+Pg. 326, "Inside IO code, exceptions may result code that is more concise and clearer (such as having a last-chance exception handler that logs all critical errors) but still shouldn’t be overused." should be "Inside IO code, exceptions may result in code that is more concise and clearer (such as having a last-chance exception handler that logs all critical errors) but still shouldn’t be overused."
+
+Pg. 350. Definition for:
+escapeString = replace "\n" "\\n" . replace "," "\\," .
+               replace "(" "\\(" . replace ")" "\\(" . pack
+Note the last replace flips the parens accidentally.
+

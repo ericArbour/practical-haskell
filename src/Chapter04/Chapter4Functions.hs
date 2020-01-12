@@ -1,8 +1,8 @@
-module Chapter4.Chapter4Functions
+module Chapter04.Chapter4Functions
   ( primes
   ) where
 
-import Chapter2.DataTypes
+import Chapter02.DataTypes
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 

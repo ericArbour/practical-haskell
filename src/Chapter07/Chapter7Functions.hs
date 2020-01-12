@@ -1,4 +1,4 @@
-module Chapter7.Chapter7Functions
+module Chapter07.Chapter7Functions
   ( main
   ) where
 

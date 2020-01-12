@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Chapter6.Chapter6Functions where
+module Chapter06.Chapter6Functions where
 
 import Lens.Micro.Platform
 

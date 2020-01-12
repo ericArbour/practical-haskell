@@ -1,4 +1,4 @@
-module Chapter2.DataTypes where
+module Chapter02.DataTypes where
 
 data Direction
   = Past

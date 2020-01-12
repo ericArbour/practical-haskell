@@ -1,8 +1,8 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Chapter2.SimpleFunctions (clients, timeMachines) where
+module Chapter02.SimpleFunctions (clients, timeMachines) where
 
-import Chapter2.DataTypes
+import Chapter02.DataTypes
 import Data.Maybe
 
 firstOrEmpty :: [String] -> String

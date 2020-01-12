@@ -1,0 +1,2 @@
+product(1,Commando 8,59.99,Illegal in most states)
+product(1,Commando 450,99.99,Not low flow)

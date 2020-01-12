@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Chapter6.KMeans
+module Chapter06.KMeans
   ( main
   ) where
 
