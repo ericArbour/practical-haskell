@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Chapter10.Functions
   ( main
@@ -8,6 +9,7 @@ import Control.Applicative
 import Control.Monad.Loops (whileM_)
 import Data.Attoparsec.Text
 import Data.Conduit
+import qualified Data.Conduit.Attoparsec as CA
 import qualified Data.Conduit.Binary as CB
 import qualified Data.Conduit.List as CL
 import qualified Data.Conduit.Text as CT
@@ -62,6 +64,9 @@ data Purchase =
 class Buildable a where
   toBuilder :: a -> B.Builder
 
+class Parsable a where
+  aParser :: Parser a
+
 instance Integral a => Buildable (Client a) where
   toBuilder = clientToBuilder
 
@@ -73,6 +78,15 @@ instance Buildable Product where
 
 instance Buildable Purchase where
   toBuilder = purchaseToBuilder
+
+instance Integral a => Parsable (Client a) where
+  aParser = aClient
+
+instance Parsable Product where
+  aParser = aProduct
+
+instance Parsable Purchase where
+  aParser = aPurchase
 
 kramer :: Person
 kramer = Person {firstName = "Cosmo", lastName = "Kramer"}
@@ -231,7 +245,7 @@ aPerson :: Parser Person
 aPerson =
   Person <$ string "person(" <*> aString <* char ',' <*> aString <* char ')'
 
-aClient :: Parser (Client Int)
+aClient :: Integral a => Parser (Client a)
 aClient =
   GovOrg <$ string "client(gov," <*> decimal <* char ',' <*> aString <* char ')' <|>
   Company <$ string "client(com," <*> decimal <* char ',' <*> aString <*
@@ -257,18 +271,17 @@ aPurchase =
   sepBy aProduct (char ',') <*
   string "])"
 
+loadData :: Parsable a => FilePath -> IO [a]
+loadData fPath =
+  runConduitRes $
+  CB.sourceFile fPath .| CT.decode CT.utf8 .| CA.sinkParser parseLines
+  where parseLines = sepBy aParser (char '\n')
+
 main :: IO ()
-main
-  {-
-  saveFile "src/Chapter10/clients.txt" clients
-  saveFile "src/Chapter10/products.txt" products
-  saveFile "src/Chapter10/purchases.txt" purchases
-  -}
-  -- print $ parseOnly aPerson $ L.toStrict $ B.toLazyText $ personToBuilder kramer
- = do
-  withFile "src/Chapter10/purchases.txt" ReadMode $ \handle -> do
-    whileM_ (not <$> hIsEOF handle) $ do
-      purchase <- T.pack <$> hGetLine handle
-      case parseOnly aPurchase purchase of
-        Right p -> print p
-        Left _ -> print purchase
+main = do
+  (clients :: [Client Int]) <- loadData "src/Chapter10/clients.txt"
+  print clients
+  (products :: [Product]) <- loadData "src/Chapter10/products.txt"
+  print products
+  (purchases :: [Purchase]) <- loadData "src/Chapter10/purchases.txt"
+  print purchases
