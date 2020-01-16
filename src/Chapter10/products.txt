@@ -1,2 +1,1 @@
-product(1,Commando 8,59.99,Illegal in most states)
-product(1,Commando 450,99.99,Not low flow)
+[{"name":"Commando 8","id":1,"price":59.99,"description":"Illegal in most states"},{"name":"Commando 450","id":1,"price":99.99,"description":"Not low flow"}]

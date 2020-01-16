@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -7,13 +8,19 @@ module Chapter10.Functions
 
 import Control.Applicative
 import Control.Monad.Loops (whileM_)
+import Data.Aeson
+import qualified Data.Aeson.Types as A
 import Data.Attoparsec.Text
+import qualified Data.ByteString.Lazy as LB
 import Data.Conduit
 import qualified Data.Conduit.Attoparsec as CA
 import qualified Data.Conduit.Binary as CB
 import qualified Data.Conduit.List as CL
 import qualified Data.Conduit.Text as CT
+import qualified Data.HashMap.Strict as M
 import Data.List (intersperse)
+import Data.Maybe
+import Data.Scientific (fromFloatDigits)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as L
 import qualified Data.Text.Lazy.Builder as B
@@ -47,7 +54,7 @@ data Client i
 
 data Product =
   Product
-    { productId :: Int
+    { productId :: Integer
     , name :: String
     , price :: Double
     , description :: String
@@ -56,7 +63,7 @@ data Product =
 
 data Purchase =
   Purchase
-    { client :: Client Int
+    { client :: Client Integer
     , purchaseProducts :: [Product]
     }
   deriving (Show)
@@ -91,7 +98,7 @@ instance Parsable Purchase where
 kramer :: Person
 kramer = Person {firstName = "Cosmo", lastName = "Kramer"}
 
-kramerica :: Client Int
+kramerica :: Client Integer
 kramerica =
   Company
     { clientId = 6
@@ -100,7 +107,7 @@ kramerica =
     , duty = "The Miana"
     }
 
-clients :: [Client Int]
+clients :: [Client Integer]
 clients =
   [ GovOrg {clientId = 1, clientName = "The Library"}
   , Company
@@ -275,13 +282,116 @@ loadData :: Parsable a => FilePath -> IO [a]
 loadData fPath =
   runConduitRes $
   CB.sourceFile fPath .| CT.decode CT.utf8 .| CA.sinkParser parseLines
-  where parseLines = sepBy aParser (char '\n')
+  where
+    parseLines = sepBy aParser (char '\n')
+
+personToJSON :: Person -> Value
+personToJSON (Person f l) =
+  object ["first" .= String (T.pack f), "last" .= String (T.pack l)]
+
+jsonToPerson :: Value -> A.Parser Person
+jsonToPerson (Object o) = Person <$> o .: "first" <*> o .: "last"
+jsonToPerson _ = empty
+
+instance ToJSON Person where
+  toJSON = personToJSON
+
+instance FromJSON Person where
+  parseJSON = jsonToPerson
+
+clientToJSON :: Client Integer -> Value
+clientToJSON (GovOrg i n) =
+  object
+    [ "type" .= String "govorg"
+    , "id" .= Number (fromInteger i)
+    , "name" .= String (T.pack n)
+    ]
+clientToJSON (Company i n p d) =
+  object
+    [ "type" .= String "company"
+    , "id" .= Number (fromInteger i)
+    , "name" .= String (T.pack n)
+    , "person" .= p
+    , "duty" .= String (T.pack d)
+    ]
+clientToJSON (Individual i p) =
+  object
+    [ "type" .= String "individual"
+    , "id" .= Number (fromInteger i)
+    , "person" .= toJSON p
+    ]
+
+jsonToClient :: FromJSON i => Value -> A.Parser (Client i)
+jsonToClient (Object o) =
+  case M.lookup "type" o of
+    Just (String "govorg") -> GovOrg <$> o .: "id" <*> o .: "name"
+    Just (String "company") ->
+      Company <$> o .: "id" <*> o .: "name" <*> o .: "person" <*> o .: "duty"
+    Just (String "individual") -> Individual <$> o .: "id" <*> o .: "person"
+    _ -> empty
+jsonToClient _ = empty
+
+instance ToJSON (Client Integer) where
+  toJSON = clientToJSON
+
+instance FromJSON i => FromJSON (Client i) where
+  parseJSON = jsonToClient
+
+productToJSON :: Product -> Value
+productToJSON (Product i n p d) =
+  object
+    [ "id" .= Number (fromInteger i)
+    , "name" .= String (T.pack n)
+    , "price" .= Number (fromFloatDigits p)
+    , "description" .= String (T.pack d)
+    ]
+
+jsonToProduct :: Value -> A.Parser Product
+jsonToProduct (Object o) =
+  Product <$> o .: "id" <*> o .: "name" <*> o .: "price" <*> o .: "description"
+jsonToProduct _ = empty
+
+instance ToJSON Product where
+  toJSON = productToJSON
+
+instance FromJSON Product where
+  parseJSON = jsonToProduct
+
+purchaseToJSON :: Purchase -> Value
+purchaseToJSON (Purchase c ps) = object [ "client" .= c, "products" .= ps ]
+
+jsonToPurchase :: Value -> A.Parser Purchase
+jsonToPurchase (Object o) = Purchase <$> o .: "client" <*> o .: "products"
+jsonToPurchase _ = empty
+
+instance ToJSON Purchase where
+  toJSON = purchaseToJSON
+
+instance FromJSON Purchase where
+  parseJSON = jsonToPurchase
+
+saveJSON :: ToJSON a => FilePath -> [a] -> IO ()
+saveJSON fPath xs =
+  runConduitRes $
+  yield (toJSON xs) .| CL.map (LB.toStrict . encode) .| CB.sinkFile fPath
+
+loadJSON :: FromJSON a => FilePath -> IO [Maybe a]
+loadJSON fPath =
+  runConduitRes $
+  CB.sourceFile fPath .| CL.map (decode . LB.fromStrict) .| CL.consume
+
+get :: [Maybe [Maybe a]] -> [a]
+get = catMaybes . fromJust . head
+
+getAvgPrice :: [Product] -> Double
+getAvgPrice ps = (sum $ map price ps) / (fromIntegral $ length ps)
 
 main :: IO ()
 main = do
-  (clients :: [Client Int]) <- loadData "src/Chapter10/clients.txt"
+  (clients :: [Client Integer]) <- get <$> loadJSON "src/Chapter10/clients.txt"
   print clients
-  (products :: [Product]) <- loadData "src/Chapter10/products.txt"
+  (products :: [Product]) <- get <$> loadJSON "src/Chapter10/products.txt"
   print products
-  (purchases :: [Purchase]) <- loadData "src/Chapter10/purchases.txt"
+  (purchases :: [Purchase]) <- get <$> loadJSON "src/Chapter10/purchases.txt"
   print purchases
+  putStrLn $ "Avg product price = " <> show (getAvgPrice products)

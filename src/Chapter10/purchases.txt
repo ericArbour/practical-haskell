@@ -1,1 +1,1 @@
-purchase(client(com,6,Kramerica Industries,person(Cosmo,Kramer),The Miana),products[product(1,Commando 8,59.99,Illegal in most states),product(1,Commando 450,99.99,Not low flow)])
+[{"products":[{"name":"Commando 8","id":1,"price":59.99,"description":"Illegal in most states"},{"name":"Commando 450","id":1,"price":99.99,"description":"Not low flow"}],"client":{"duty":"The Miana","person":{"first":"Cosmo","last":"Kramer"},"name":"Kramerica Industries","id":6,"type":"company"}}]

@@ -26,3 +26,8 @@ escapeString = replace "\n" "\\n" . replace "," "\\," .
                replace "(" "\\(" . replace ")" "\\(" . pack
 Note the last replace flips the parens accidentally.
 
+Pg. 361. "and you saw how Maybe an instance of Applicative is too" should be "and you saw how Maybe is an instance of Applicative too"
+
+Pg. 365, "If you apply one parameter using (<*>), you get the following type:" (<*>) should be (<$>) per the example that follows.
+
+Pg. 375. "One small tidbit is that encoding and decoding in aeson work on lazy ByteStrings." should be "One small tidbit is that encoding and decoding in aeson works on lazy ByteStrings."

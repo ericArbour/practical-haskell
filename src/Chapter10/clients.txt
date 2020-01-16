@@ -1,6 +1,1 @@
-client(gov,1,The Library)
-client(com,2,McDonalds,person(Ronald,McDonald),Owner)
-client(ind,3,person(Elaine,Benes))
-client(ind,4,person(Jerry,Seinfeld))
-client(ind,5,person(George,Costanza))
-client(com,6,Kramerica Industries,person(Cosmo,Kramer),The Miana)
+[{"name":"The Library","id":1,"type":"govorg"},{"duty":"Owner","person":{"first":"Ronald","last":"McDonald"},"name":"McDonalds","id":2,"type":"company"},{"person":{"first":"Elaine","last":"Benes"},"id":3,"type":"individual"},{"person":{"first":"Jerry","last":"Seinfeld"},"id":4,"type":"individual"},{"person":{"first":"George","last":"Costanza"},"id":5,"type":"individual"},{"duty":"The Miana","person":{"first":"Cosmo","last":"Kramer"},"name":"Kramerica Industries","id":6,"type":"company"}]
