@@ -2,7 +2,7 @@ module Main
   ( main
   ) where
 
-import qualified Chapter10.Functions as Ch10
+import qualified Chapter11.Functions as Ch11
 
 main :: IO ()
-main = Ch10.main
+main = Ch11.main

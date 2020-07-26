@@ -31,3 +31,7 @@ Pg. 361. "and you saw how Maybe an instance of Applicative is too" should be "an
 Pg. 365, "If you apply one parameter using (<*>), you get the following type:" (<*>) should be (<$>) per the example that follows.
 
 Pg. 375. "One small tidbit is that encoding and decoding in aeson work on lazy ByteStrings." should be "One small tidbit is that encoding and decoding in aeson works on lazy ByteStrings."
+
+Pg. 377. You mention that automatically derived instances of ToJSON and FromJSON only work on data declarations defined using record syntax but I did not find this supported by Aeson's documentation.
+
+Pg. 388. "In particular, this means you can use the same field name in different entities (e.g., using a field name for both individual and company entities) since the prefix will take them apart." "take them apart" sounds confusing, maybe "tell them apart"?
